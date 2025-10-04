@@ -24,6 +24,7 @@ Librairies : googleapiclient (YouTube Data API v3), pandas, datetime, csv
 
 import pandas as pd
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from datetime import datetime
 import time
 
@@ -42,7 +43,16 @@ def get_channel_details(channel_id):
         part="snippet,statistics,contentDetails",
         id=channel_id
     )
-    response = request.execute()
+    try:
+        response = request.execute()
+    except HttpError as error:
+        print(f"⚠️ HTTP error while fetching channel details for {channel_id}: {error}")
+        time.sleep(5)
+        return None
+    except Exception as error:
+        print(f"⚠️ Unexpected error while fetching channel details for {channel_id}: {error}")
+        time.sleep(5)
+        return None
     
     if not response['items']:
         return None
@@ -75,7 +85,16 @@ def get_playlist_videos(playlist_id, max_results=50):
             maxResults=50,
             pageToken=next_page_token
         )
-        response = request.execute()
+        try:
+            response = request.execute()
+        except HttpError as error:
+            print(f"⚠️ HTTP error while fetching playlist items for {playlist_id}: {error}")
+            time.sleep(5)
+            break
+        except Exception as error:
+            print(f"⚠️ Unexpected error while fetching playlist items for {playlist_id}: {error}")
+            time.sleep(5)
+            break
 
         video_data.extend(response['items'])
 
@@ -91,7 +110,16 @@ def get_video_stats(video_ids):
         part="statistics,snippet",
         id=",".join(video_ids[:50])
     )
-    response = request.execute()
+    try:
+        response = request.execute()
+    except HttpError as error:
+        print(f"⚠️ HTTP error while fetching video stats: {error}")
+        time.sleep(5)
+        return []
+    except Exception as error:
+        print(f"⚠️ Unexpected error while fetching video stats: {error}")
+        time.sleep(5)
+        return []
 
     video_info = []
     for video in response['items']:
@@ -113,12 +141,23 @@ filtered_channels = []
 for keyword in SEARCH_KEYWORDS:
     print(f"\n🔍 Searching for keyword: {keyword}")
     
-    search_response = youtube.search().list(
+    search_request = youtube.search().list(
         q=keyword,
         type="channel",
         part="snippet",
         maxResults=MAX_RESULTS
-    ).execute()
+    )
+
+    try:
+        search_response = search_request.execute()
+    except HttpError as error:
+        print(f"⚠️ HTTP error during search for '{keyword}': {error}")
+        time.sleep(5)
+        continue
+    except Exception as error:
+        print(f"⚠️ Unexpected error during search for '{keyword}': {error}")
+        time.sleep(5)
+        continue
 
     for item in search_response['items']:
         channel_id = item['snippet']['channelId']
