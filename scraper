@@ -192,10 +192,15 @@ for keyword in SEARCH_KEYWORDS:
 
         video_ids = [v['contentDetails']['videoId'] for v in playlist_videos]
         video_stats = get_video_stats(video_ids)
-        
+
+        if not video_stats:
+            print(f"⚠️ Aucun détail de vidéo récupéré pour la chaîne {channel_data['channel_title']} ({channel_id}). Passage au canal suivant.")
+            continue
+
         # Sort videos by publish date
         video_stats_sorted = sorted(video_stats, key=lambda x: x['publishedAt'])
-        first_video_date = datetime.strptime(video_stats_sorted[0]['publishedAt'], "%Y-%m-%dT%H:%M:%SZ")
+        first_video_published_at = video_stats_sorted[0]['publishedAt']
+        first_video_date = datetime.strptime(first_video_published_at, "%Y-%m-%dT%H:%M:%SZ")
         age_in_months = (datetime.utcnow() - first_video_date).days / 30
 
         # Filter 3: Channel must be less than 6 months old
@@ -203,7 +208,7 @@ for keyword in SEARCH_KEYWORDS:
             continue
 
         # Find highest viewed video
-        max_views = max(v['views'] for v in video_stats)
+        max_views = max(v['views'] for v in video_stats_sorted)
 
         # Filter 4: At least one video with > 500k views
         if max_views < 500000:
