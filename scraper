@@ -22,13 +22,19 @@ Langage : Python
 Librairies : googleapiclient (YouTube Data API v3), pandas, datetime, csv
 """
 
+import os
 import pandas as pd
 from googleapiclient.discovery import build
 from datetime import datetime
 import time
 
 # ---- CONFIGURATION ---- #
-API_KEY = "AIzaSyB4EyJbSIah4NRYv3FMqAE4wFrAnhQZpZ4"  # ← Replace with your actual YouTube Data API v3 key
+API_KEY = os.environ.get("YOUTUBE_API_KEY")
+if not API_KEY:
+    raise RuntimeError(
+        "The YOUTUBE_API_KEY environment variable must be set with a valid "
+        "YouTube Data API v3 key."
+    )
 SEARCH_KEYWORDS = ["self improvement", "AI tools", "wealth mindset", "luxury lifestyle", "crypto news"]
 MAX_RESULTS = 10  # per keyword
 OUTPUT_FILE = "youtube_channels_filtered.csv"
