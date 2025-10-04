@@ -28,7 +28,7 @@ from datetime import datetime
 import time
 
 # ---- CONFIGURATION ---- #
-API_KEY = "YOUR_API_KEY"  # ← Replace with your actual YouTube Data API v3 key
+API_KEY = "AIzaSyB4EyJbSIah4NRYv3FMqAE4wFrAnhQZpZ4"  # ← Replace with your actual YouTube Data API v3 key
 SEARCH_KEYWORDS = ["self improvement", "AI tools", "wealth mindset", "luxury lifestyle", "crypto news"]
 MAX_RESULTS = 10  # per keyword
 OUTPUT_FILE = "youtube_channels_filtered.csv"
