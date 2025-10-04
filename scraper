@@ -149,6 +149,7 @@ def get_video_stats(video_ids):
 
 # ---- MAIN SCRAPER FUNCTION ---- #
 filtered_channels = []
+seen_channel_ids = set()
 
 for keyword in SEARCH_KEYWORDS:
     print(f"\n🔍 Searching for keyword: {keyword}")
@@ -173,6 +174,8 @@ for keyword in SEARCH_KEYWORDS:
 
     for item in search_response['items']:
         channel_id = item['snippet']['channelId']
+        if channel_id in seen_channel_ids:
+            continue
         channel_data = get_channel_details(channel_id)
         if not channel_data:
             continue
@@ -218,6 +221,7 @@ for keyword in SEARCH_KEYWORDS:
         channel_data['first_video_date'] = first_video_date.strftime("%Y-%m-%d")
         channel_data['max_video_views'] = max_views
         filtered_channels.append(channel_data)
+        seen_channel_ids.add(channel_id)
         print(f"✅ Channel added: {channel_data['channel_title']}")
 
         time.sleep(1)  # Respect API limits
