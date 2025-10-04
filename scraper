@@ -176,8 +176,12 @@ for keyword in SEARCH_KEYWORDS:
         channel_id = item['snippet']['channelId']
         if channel_id in seen_channel_ids:
             continue
+
+        seen_channel_ids.add(channel_id)
+
         channel_data = get_channel_details(channel_id)
         if not channel_data:
+            seen_channel_ids.discard(channel_id)
             continue
 
         # Filter 1: Subscriber count
@@ -221,12 +225,31 @@ for keyword in SEARCH_KEYWORDS:
         channel_data['first_video_date'] = first_video_date.strftime("%Y-%m-%d")
         channel_data['max_video_views'] = max_views
         filtered_channels.append(channel_data)
-        seen_channel_ids.add(channel_id)
         print(f"✅ Channel added: {channel_data['channel_title']}")
 
         time.sleep(1)  # Respect API limits
 
 # ---- EXPORT TO CSV ---- #
-df = pd.DataFrame(filtered_channels)
+csv_columns = [
+    "channel_title",
+    "channel_url",
+    "subscribers",
+    "total_videos",
+    "first_video_date",
+    "total_views",
+    "max_video_views",
+]
+
+if filtered_channels:
+    df = pd.DataFrame(filtered_channels).reindex(columns=csv_columns)
+else:
+    df = pd.DataFrame(columns=csv_columns)
+
 df.to_csv(OUTPUT_FILE, index=False)
-print(f"\n📁 Exported {len(filtered_channels)} channels to {OUTPUT_FILE}")
+
+if filtered_channels:
+    print(f"\n📁 Exported {len(filtered_channels)} channels to {OUTPUT_FILE}")
+else:
+    print(
+        f"\n📁 No channels matched the criteria. An empty template was saved to {OUTPUT_FILE}."
+    )
